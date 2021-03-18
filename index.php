@@ -20,37 +20,41 @@ $json = file_get_contents("storage/amazing-garden.json");
 $jsonArray = json_decode($json, true);
 
 $warehouseOne = new warehouseOne();
-$warehouseOne->shipmentSize($jsonArray["name"],$jsonArray["amount"]);
+$warehouseOne->shipmentSize($jsonArray["name"], $jsonArray["amount"]);
 //add delivery amount to main collection
-foreach($flowers->getFlowers() as $flower){
-    foreach($warehouseOne->delivery()->getFlowers() as $delivery){
-        if($flower->getName() == $delivery->getName())
-        {
+foreach ($flowers->getFlowers() as $flower) {
+    foreach ($warehouseOne->delivery()->getFlowers() as $delivery) {
+        if ($flower->getName() == $delivery->getName()) {
             $flower->addAmount($delivery->getAmount());
         }
     }
 }
 
 $csv = file("storage/super-garden.csv");
+$row = 1;
 $csvArray = [];
-foreach ($csv as $line) {
-    $csvArray[(string)explode(',', $line)[0]] = (int)explode(',', $line)[1];
+if (($handle = fopen("storage/super-garden.csv", "r")) !== FALSE) {
+    while (($data = fgetcsv($handle, 1000, ",")) !== FALSE) {
+        $num = count($data);
+        $row++;
+        for ($c = 0; $c < $num; $c++) {
+            array_push($csvArray, $data[$c]);
+        }
+    }
+    fclose($handle);
 }
 
 $warehouseTwo = new warehouseTwo();
-foreach($csvArray as $key => $value) {
-    $warehouseTwo->shipmentSize(new Flower($key, $value));
-}
-foreach($flowers->getFlowers() as $flower){
-    foreach($warehouseTwo->delivery()->getFlowers() as $delivery){
-        if($flower->getName() == $delivery->getName())
-        {
+
+$warehouseTwo->shipmentSize(new Flower($csvArray[0], $csvArray[1]));
+
+foreach ($flowers->getFlowers() as $flower) {
+    foreach ($warehouseTwo->delivery()->getFlowers() as $delivery) {
+        if ($flower->getName() == $delivery->getName()) {
             $flower->addAmount($delivery->getAmount());
         }
     }
 }
-
-
 
 
 //$gender = readline('Enter your gender male/female: ');
