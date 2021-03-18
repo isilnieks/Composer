@@ -34,11 +34,13 @@ foreach($flowers->getFlowers() as $flower){
 $csv = file("storage/super-garden.csv");
 $csvArray = [];
 foreach ($csv as $line) {
-    $csvArray = explode(' ',str_getcsv($line)[0]);
+    $csvArray[(string)explode(',', $line)[0]] = (int)explode(',', $line)[1];
 }
 
 $warehouseTwo = new warehouseTwo();
-$warehouseTwo->shipmentSize(new Flower($csvArray[0], $csvArray[1]));
+foreach($csvArray as $key => $value) {
+    $warehouseTwo->shipmentSize(new Flower($key, $value));
+}
 foreach($flowers->getFlowers() as $flower){
     foreach($warehouseTwo->delivery()->getFlowers() as $delivery){
         if($flower->getName() == $delivery->getName())
