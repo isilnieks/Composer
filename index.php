@@ -2,9 +2,11 @@
 require_once 'vendor/autoload.php';
 
 use App\Flower;
+use App\Sellable;
 use App\FlowerCollection;
 use App\Suppliers\warehouseOne;
 use App\Suppliers\warehouseTwo;
+use Medoo\Medoo;
 
 
 $flowers = new FlowerCollection();
@@ -34,7 +36,7 @@ $csv = file("storage/super-garden.csv");
 $row = 1;
 $csvArray = [];
 if (($handle = fopen("storage/super-garden.csv", "r")) !== FALSE) {
-    while (($data = fgetcsv($handle, 1000, ",")) !== FALSE) {
+    while (($data = fgetcsv($handle, 1000 )) !== FALSE) {
         $num = count($data);
         $row++;
         for ($c = 0; $c < $num; $c++) {
@@ -55,6 +57,26 @@ foreach ($flowers->getFlowers() as $flower) {
         }
     }
 }
+
+$database = new Medoo([
+    'database_type' => 'mysql',
+    'database_name' => 'codelex',
+    'server' => '127.0.0.1',
+    'username' => 'root',
+    'password' => 'root'
+]);
+
+$productsInfo = $database->select('products','*');
+
+$sellable = new Sellable($productsInfo[0]["name"],$productsInfo[0]["amount"]);
+
+foreach ($flowers->getFlowers() as $flower) {{
+        if ($flower->getName() == $sellable->getName()) {
+            $flower->addAmount($sellable->getAmount());
+        }
+    }
+}
+
 
 
 //$gender = readline('Enter your gender male/female: ');
